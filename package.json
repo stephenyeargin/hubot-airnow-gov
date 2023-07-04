@@ -1,20 +1,23 @@
 {
-  "name": "template-hubot-script",
-  "description": "Template for a Hubot script package.",
+  "name": "hubot-airnow-gov",
+  "description": "Retrieve air quality scores for locations in the United States.",
   "version": "0.0.0",
-  "author": "Your Name <name@example.com>",
-  "homepage": "https://github.com/stephenyeargin/template-hubot-script",
+  "author": "Stephen Yeargin <stephen@yearg.in>",
+  "homepage": "https://github.com/stephenyeargin/hubot-airnow-gov",
   "license": "MIT",
   "keywords": [
     "hubot",
-    "hubot-scripts"
+    "hubot-scripts",
+    "airnow.gov",
+    "air quality",
+    "aqi"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/stephenyeargin/template-hubot-script.git"
+    "url": "git://github.com/stephenyeargin/hubot-airnow-gov.git"
   },
   "bugs": {
-    "url": "https://github.com/stephenyeargin/template-hubot-script/issues"
+    "url": "https://github.com/stephenyeargin/hubot-airnow-gov/issues"
   },
   "peerDependencies": {
     "hubot": ">=2"
