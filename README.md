@@ -1,5 +1,7 @@
 # AirNow.gov for Hubot
 
+[![npm version](https://badge.fury.io/js/hubot-airnow-gov.svg)](http://badge.fury.io/js/hubot-airnow-gov) [![Node CI](https://github.com/stephenyeargin/hubot-airnow-gov/actions/workflows/nodejs.yml/badge.svg)](https://github.com/stephenyeargin/hubot-airnow-gov/actions/workflows/nodejs.yml)
+
 Retrieves US air quality scores for locations in the United States.
 
 ## Installation
@@ -18,7 +20,7 @@ Then add **hubot-airnow-gov** to your `external-scripts.json`:
 
 | Environment Variables      | Required? | Description                                    |
 | -------------------------- | :-------: | ---------------------------------------------- |
-| `HUBOT_AIRNOW_API_KEY`     | Yes       | API key from the https://docs.airnowgov.org    |
+| `HUBOT_AIRNOW_API_KEY`     | Yes       | API key from the https://docs.airnowapi.org    |
 | `HUBOT_AIRNOW_DEFAULT_ZIP` | Yes       | Default ZIP code to use when using `hubot aqi` |
 
 ## Usage
