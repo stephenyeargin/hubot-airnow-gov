@@ -34,6 +34,16 @@ module.exports = (robot) => {
       robot.http(`https://www.airnowapi.org/${path}`)
         .query(queryPayload)
         .get()((err, res, body) => {
+          if (res.statusCode === 500) {
+            robot.logger.debug(body);
+            callback('Received an invalid response from the API.');
+            return;
+          }
+          if (res.statusCode === 401) {
+            robot.logger.debug(body);
+            callback('Invalid API key');
+            return;
+          }
           callback(err, res, body);
         });
       return;
@@ -84,7 +94,7 @@ module.exports = (robot) => {
       distance: 25,
     };
 
-    makeAPIRequest('GET', 'aq/observation/zipCode/current/', payload, (err, _res, body) => {
+    makeAPIRequest('GET', 'aq/observation/zipCode/current/', payload, (err, res, body) => {
       if (err) {
         robot.logger.error(err);
         msg.send(`Error: ${err}`);
@@ -95,6 +105,18 @@ module.exports = (robot) => {
         const apiResponse = JSON.parse(body);
         const aqiMeasurements = [];
         const aqiMeasurementsFields = [];
+        // Unexpected response (not a list of observations)
+        if (!Array.isArray(apiResponse)) {
+          robot.logger.error('Invalid response:', apiResponse);
+          msg.send('Received an invalid response from the API.');
+          return;
+        }
+        // Empty response (no observations)
+        if (apiResponse.length === 0) {
+          robot.logger.debug(apiResponse);
+          msg.send(`No current observations for ${zipCode}`);
+          return;
+        }
         apiResponse.forEach((row) => {
           aqiMeasurements.push(`${row.ParameterName}: ${row.AQI} (${row.Category.Name})`);
           aqiMeasurementsFields.push({
@@ -104,6 +126,8 @@ module.exports = (robot) => {
           });
         });
         const textFallback = `${apiResponse[0].ReportingArea}, ${apiResponse[0].StateCode} - ${aqiMeasurements.join('; ')}`;
+        const timestamp = new Date(apiResponse[0].DateObserved);
+        timestamp.setHours(apiResponse[0].HourObserved);
 
         switch (robot.adapterName) {
           case 'slack':
@@ -118,7 +142,7 @@ module.exports = (robot) => {
                 color: getScoreColor(apiResponse[0].AQI),
                 fields: aqiMeasurementsFields,
                 footer: 'AirNow.gov',
-                ts: Math.floor(Date.now() / 1000),
+                ts: Math.floor(timestamp / 1000),
               }],
             });
             break;

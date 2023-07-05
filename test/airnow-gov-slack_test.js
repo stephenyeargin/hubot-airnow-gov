@@ -10,7 +10,6 @@ const helper = new Helper([
   './../src/airnow-gov.js',
 ]);
 const { expect } = chai;
-const originalDate = Date.now;
 
 describe('hubot-airnow-gov slack', () => {
   let room = null;
@@ -28,7 +27,6 @@ describe('hubot-airnow-gov slack', () => {
         api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
       })
       .replyWithFile(200, './test/fixtures/current.json');
-    Date.now = () => 1688519184000;
     room = helper.createRoom();
     nock.disableNetConnect();
   });
@@ -39,7 +37,6 @@ describe('hubot-airnow-gov slack', () => {
     delete process.env.HUBOT_AIRNOW_DEFAULT_ZIP;
     room.destroy();
     nock.cleanAll();
-    Date.now = originalDate;
   });
 
   context('retrieve air quality for default location', () => {
@@ -73,7 +70,7 @@ describe('hubot-airnow-gov slack', () => {
             footer: 'AirNow.gov',
             title: 'Nashville, TN Air Quality',
             title_link: 'https://www.airnow.gov/?city=Nashville&state=TN&country=USA',
-            ts: 1688519184,
+            ts: 1688497200,
           },
         ],
       }],
@@ -111,7 +108,7 @@ describe('hubot-airnow-gov slack', () => {
             footer: 'AirNow.gov',
             title: 'Nashville, TN Air Quality',
             title_link: 'https://www.airnow.gov/?city=Nashville&state=TN&country=USA',
-            ts: 1688519184,
+            ts: 1688497200,
           },
         ],
       }],
