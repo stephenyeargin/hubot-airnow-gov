@@ -6,22 +6,24 @@
 //   HUBOT_AIRNOW_DEFAULT_ZIP - Default ZIP code to use for queries
 //
 // Commands:
-//   hubot hello - Gets a message
-//   hubot hello <message> - Sends a message
+//   hubot aqi - Retrieves air quality index (AQI) for default ZIP code
+//   hubot aqi <zip> - Retrieves air quality index (AQI) for given ZIP code
 //
+
+const dayjs = require('dayjs');
 
 module.exports = (robot) => {
   const apiKey = process.env.HUBOT_AIRNOW_API_KEY || '';
   const defaultZIP = process.env.HUBOT_AIRNOW_DEFAULT_ZIP || '';
 
   const makeAPIRequest = (method, path, payload, callback) => {
-    if (!payload.zipCode) {
-      callback('Missing HUBOT_AIRNOW_DEFAULT_ZIP');
+    if (!apiKey) {
+      callback('Missing HUBOT_AIRNOW_API_KEY');
       return;
     }
 
-    if (!apiKey) {
-      callback('Missing HUBOT_AIRNOW_API_KEY');
+    if (!payload.zipCode) {
+      callback('Missing HUBOT_AIRNOW_DEFAULT_ZIP');
       return;
     }
 
@@ -34,6 +36,16 @@ module.exports = (robot) => {
       robot.http(`https://www.airnowapi.org/${path}`)
         .query(queryPayload)
         .get()((err, res, body) => {
+          if (res.statusCode === 500) {
+            robot.logger.debug(body);
+            callback('Received an invalid response from the API.');
+            return;
+          }
+          if (res.statusCode === 401) {
+            robot.logger.debug(body);
+            callback('Invalid API key');
+            return;
+          }
           callback(err, res, body);
         });
       return;
@@ -43,9 +55,39 @@ module.exports = (robot) => {
     callback('Invalid method!');
   };
 
-  robot.respond(/aqi\s?(.*)/i, (msg) => {
-    robot.logger.info('default zip code:', defaultZIP);
-    robot.logger.info('arguments: ', msg.match);
+  /**
+   * 0 - 50     Good
+   * 51 - 100   Moderate
+   * 101 - 150  Unhealthy for Sensitive Groups (USG)
+   * 151 - 200  Unhealthy
+   * 201 - 300  Very Unhealthy
+   * 301 +      Hazardous
+   */
+  const getScoreColor = (score) => {
+    if (score <= 50) {
+      return '#00e400';
+    }
+    if (score <= 100) {
+      return '#ffff00';
+    }
+    if (score <= 150) {
+      return '#ff7e00';
+    }
+    if (score <= 200) {
+      return 'ff0000';
+    }
+    if (score <= 300) {
+      return '#99004c';
+    }
+    if (score > 300) {
+      return '#7e0023';
+    }
+    return 'gray';
+  };
+
+  robot.respond(/(?:aqi|air quality|air)\s?(\d{4,5})?/i, (msg) => {
+    robot.logger.debug('default zip code:', defaultZIP);
+    robot.logger.debug('arguments: ', msg.match);
 
     const zipCode = msg.match[1] || defaultZIP;
 
@@ -54,7 +96,7 @@ module.exports = (robot) => {
       distance: 25,
     };
 
-    makeAPIRequest('GET', 'aq/observation/zipCode/current/', payload, (err, _res, body) => {
+    makeAPIRequest('GET', 'aq/observation/zipCode/current/', payload, (err, res, body) => {
       if (err) {
         robot.logger.error(err);
         msg.send(`Error: ${err}`);
@@ -64,11 +106,51 @@ module.exports = (robot) => {
       try {
         const apiResponse = JSON.parse(body);
         const aqiMeasurements = [];
+        const aqiMeasurementsFields = [];
+        // Unexpected response (not a list of observations)
+        if (!Array.isArray(apiResponse)) {
+          robot.logger.error('Invalid response:', apiResponse);
+          msg.send('Received an invalid response from the API.');
+          return;
+        }
+        // Empty response (no observations)
+        if (apiResponse.length === 0) {
+          robot.logger.debug(apiResponse);
+          msg.send(`No current observations for ${zipCode}`);
+          return;
+        }
         apiResponse.forEach((row) => {
           aqiMeasurements.push(`${row.ParameterName}: ${row.AQI} (${row.Category.Name})`);
+          aqiMeasurementsFields.push({
+            short: true,
+            title: row.ParameterName,
+            value: `${row.AQI} (${row.Category.Name})`,
+          });
         });
+        const textFallback = `${apiResponse[0].ReportingArea}, ${apiResponse[0].StateCode} - ${aqiMeasurements.join('; ')}`;
+        const timestamp = dayjs(`${apiResponse[0].DateObserved} ${apiResponse[0].HourObserved}:00 ${apiResponse[0].LocalTimeZone}`).unix();
 
-        msg.send(`${apiResponse[0].ReportingArea}, ${apiResponse[0].StateCode} - ${aqiMeasurements.join('; ')}`);
+        switch (robot.adapterName) {
+          case 'slack':
+            msg.send({
+              attachments: [{
+                title: `${apiResponse[0].ReportingArea}, ${apiResponse[0].StateCode} Air Quality`,
+                title_link: `https://www.airnow.gov/?city=${apiResponse[0].ReportingArea}&state=${apiResponse[0].StateCode}&country=USA`,
+                fallback: textFallback,
+                author_icon: 'https://www.airnow.gov/apple-touch-icon.png',
+                author_link: 'https://www.airnow.gov/',
+                author_name: 'AirNow.gov',
+                color: getScoreColor(apiResponse[0].AQI),
+                fields: aqiMeasurementsFields,
+                footer: 'AirNow.gov',
+                ts: timestamp,
+              }],
+            });
+            break;
+          default:
+            msg.send(textFallback);
+            break;
+        }
       } catch (parseError) {
         robot.logger.error(parseError);
         msg.send('Unable to retrieve current air quality.');
