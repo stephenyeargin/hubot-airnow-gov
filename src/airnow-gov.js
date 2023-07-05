@@ -10,6 +10,8 @@
 //   hubot aqi <zip> - Retrieves air quality index (AQI) for given ZIP code
 //
 
+const dayjs = require('dayjs');
+
 module.exports = (robot) => {
   const apiKey = process.env.HUBOT_AIRNOW_API_KEY || '';
   const defaultZIP = process.env.HUBOT_AIRNOW_DEFAULT_ZIP || '';
@@ -126,8 +128,7 @@ module.exports = (robot) => {
           });
         });
         const textFallback = `${apiResponse[0].ReportingArea}, ${apiResponse[0].StateCode} - ${aqiMeasurements.join('; ')}`;
-        const timestamp = new Date(apiResponse[0].DateObserved);
-        timestamp.setHours(apiResponse[0].HourObserved);
+        const timestamp = dayjs(`${apiResponse[0].DateObserved} ${apiResponse[0].HourObserved}:00 ${apiResponse[0].LocalTimeZone}`).unix();
 
         switch (robot.adapterName) {
           case 'slack':
@@ -142,7 +143,7 @@ module.exports = (robot) => {
                 color: getScoreColor(apiResponse[0].AQI),
                 fields: aqiMeasurementsFields,
                 footer: 'AirNow.gov',
-                ts: Math.floor(timestamp / 1000),
+                ts: timestamp,
               }],
             });
             break;
