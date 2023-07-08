@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/hubot-airnow-gov.svg)](http://badge.fury.io/js/hubot-airnow-gov) [![Node CI](https://github.com/stephenyeargin/hubot-airnow-gov/actions/workflows/nodejs.yml/badge.svg)](https://github.com/stephenyeargin/hubot-airnow-gov/actions/workflows/nodejs.yml)
 
-Retrieves US air quality scores for locations in the United States.
+Retrieves air quality scores for locations in the United States.
 
 ## Installation
 
