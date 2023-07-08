@@ -1,5 +1,5 @@
 // Description:
-//   Retrieves US air quality scores for locations in the United States.
+//   Retrieves air quality scores for locations in the United States.
 //
 // Configuration:
 //   HUBOT_AIRNOW_API_KEY - API key from https://docs.airnowapi.org/
