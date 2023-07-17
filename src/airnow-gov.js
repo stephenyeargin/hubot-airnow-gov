@@ -85,7 +85,7 @@ module.exports = (robot) => {
     return 'gray';
   };
 
-  robot.respond(/(?:aqi|air quality|air)\s?(\d{4,5})?/i, (msg) => {
+  robot.respond(/(?:aqi|air quality|air|airnow)\s?(\d{4,5})?/i, (msg) => {
     robot.logger.debug('default zip code:', defaultZIP);
     robot.logger.debug('arguments: ', msg.match);
 
@@ -96,7 +96,7 @@ module.exports = (robot) => {
       distance: 25,
     };
 
-    makeAPIRequest('GET', 'aq/observation/zipCode/current/', payload, (err, res, body) => {
+    makeAPIRequest('GET', 'aq/observation/zipCode/current/', payload, (err, _res, body) => {
       if (err) {
         robot.logger.error(err);
         msg.send(`Error: ${err}`);
@@ -119,7 +119,10 @@ module.exports = (robot) => {
           msg.send(`No current observations for ${zipCode}`);
           return;
         }
-        apiResponse.forEach((row) => {
+        // Show highest value first
+        const measurements = apiResponse.sort((a, b) => b.AQI - a.AQI);
+
+        measurements.forEach((row) => {
           aqiMeasurements.push(`${row.ParameterName}: ${row.AQI} (${row.Category.Name})`);
           aqiMeasurementsFields.push({
             short: true,
@@ -127,20 +130,20 @@ module.exports = (robot) => {
             value: `${row.AQI} (${row.Category.Name})`,
           });
         });
-        const textFallback = `${apiResponse[0].ReportingArea}, ${apiResponse[0].StateCode} - ${aqiMeasurements.join('; ')}`;
-        const timestamp = dayjs(`${apiResponse[0].DateObserved} ${apiResponse[0].HourObserved}:00 ${apiResponse[0].LocalTimeZone}`).unix();
+        const textFallback = `${measurements[0].ReportingArea}, ${measurements[0].StateCode} - ${aqiMeasurements.join('; ')}`;
+        const timestamp = dayjs(`${measurements[0].DateObserved} ${measurements[0].HourObserved}:00 ${measurements[0].LocalTimeZone}`).unix();
 
         switch (robot.adapterName) {
           case 'slack':
             msg.send({
               attachments: [{
-                title: `${apiResponse[0].ReportingArea}, ${apiResponse[0].StateCode} Air Quality`,
-                title_link: `https://www.airnow.gov/?city=${apiResponse[0].ReportingArea}&state=${apiResponse[0].StateCode}&country=USA`,
+                title: `${measurements[0].ReportingArea}, ${measurements[0].StateCode} Air Quality`,
+                title_link: `https://www.airnow.gov/?city=${measurements[0].ReportingArea}&state=${measurements[0].StateCode}&country=USA`,
                 fallback: textFallback,
                 author_icon: 'https://www.airnow.gov/apple-touch-icon.png',
                 author_link: 'https://www.airnow.gov/',
                 author_name: 'AirNow.gov',
-                color: getScoreColor(apiResponse[0].AQI),
+                color: getScoreColor(measurements[0].AQI),
                 fields: aqiMeasurementsFields,
                 footer: 'AirNow.gov',
                 ts: timestamp,
