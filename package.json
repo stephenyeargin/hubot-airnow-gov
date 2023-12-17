@@ -33,19 +33,16 @@
     "husky": "^8.0.3",
     "mocha": "^10.2.0",
     "nock": "^13.3.3",
-    "release-it": "^16.1.5",
     "sinon": "^15.2.0",
     "sinon-chai": "^3.7.0"
   },
   "main": "index.js",
   "scripts": {
-    "release": "release-it",
-    "test": "mocha \"test/**/*.js\" --reporter spec",
+    "test": "script/test",
     "prepare": "husky install"
   },
   "volta": {
-    "node": "16.20.0",
-    "npm": "8.19.4"
+    "node": "18.19.0"
   },
   "dependencies": {
     "dayjs": "^1.11.9"
