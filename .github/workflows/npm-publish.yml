@@ -33,11 +33,3 @@ jobs:
         run: |
           VERSION="v${{ steps.publish.outputs.version }}"
           gh release create $VERSION --generate-notes
-
-      - if: ${{ steps.publish.outputs.type }}
-        name: Publish to GitHub Packages
-        env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
-          npm publish --registry=https://npm.pkg.github.com/
