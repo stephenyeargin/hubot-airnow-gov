@@ -46,9 +46,5 @@
   },
   "dependencies": {
     "dayjs": "^1.11.9"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/",
-    "name": "@stephenyeargin/hubot-airnow-gov"
   }
 }
