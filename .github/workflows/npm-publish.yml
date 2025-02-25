@@ -47,8 +47,6 @@ jobs:
           GITHUB_PACKAGE_NAME="@${{ github.repository_owner }}/$PACKAGE_NAME"
           LATEST_VERSION=$(npm show $PACKAGE_NAME version)
           echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
-          LATEST_GITHUB_VERSION=$(npm show $GITHUB_PACKAGE_NAME version)
-          echo "LATEST_GITHUB_VERSION=$LATEST_GITHUB_VERSION" >> $GITHUB_ENV
 
       # Check if the version has changed for NPM and GitHub Packages
       - name: Check if version has changed
@@ -62,14 +60,6 @@ jobs:
             echo "has_changed_npm=true" >> $GITHUB_ENV
           fi
 
-          if [ "$LATEST_GITHUB_VERSION" == "$CURRENT_VERSION" ]; then
-            echo "Version has not changed for GitHub Packages. Skipping publish to GitHub Packages."
-            echo "has_changed_github=false" >> $GITHUB_ENV
-          else
-            echo "Version has changed for GitHub Packages. Proceeding with publish to GitHub Packages."
-            echo "has_changed_github=true" >> $GITHUB_ENV
-          fi
-
       # Publish to NPM (if version has changed for NPM)
       - name: Publish to NPM
         if: ${{ env.has_changed_npm == 'true' }}
@@ -79,7 +69,7 @@ jobs:
 
       # Publish to GitHub Packages (if version has changed for GitHub Packages)
       - name: Publish to GitHub Packages
-        if: ${{ env.has_changed_github == 'true' }}
+        if: ${{ env.has_changed_npm == 'true' }}
         run: |
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
           npm publish --registry=${{ env.GITHUB_REGISTRY }} --name $GITHUB_PACKAGE_NAME
