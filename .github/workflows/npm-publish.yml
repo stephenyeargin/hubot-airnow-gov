@@ -10,7 +10,7 @@ permissions:
   packages: write
 
 env:
-  NPM_REGISTRY: "https://npm.pkg.github.com/"
+  NPM_REGISTRY: "https://registry.npmjs.org/"
   GITHUB_REGISTRY: "https://npm.pkg.github.com/"
 
 jobs:
@@ -34,45 +34,59 @@ jobs:
       - name: Get PACKAGE_NAME from package.json
         id: get_package_name
         run: |
+          # Extract the package name from package.json
           PACKAGE_NAME=$(jq -r '.name' package.json)
-          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
 
-      # Get current version from package.json
-      - name: Get current version from package.json
-        id: get_version
-        run: echo "CURRENT_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+          # Set the PACKAGE_NAME environment variable
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
 
       # Get the latest published version from NPM
       - name: Get latest version from NPM
         id: latest_npm_version
         run: |
+          GITHUB_PACKAGE_NAME="@${{ github.repository_owner }}/$PACKAGE_NAME"
           LATEST_VERSION=$(npm show $PACKAGE_NAME version)
           echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+          LATEST_GITHUB_VERSION=$(npm show $GITHUB_PACKAGE_NAME version)
+          echo "LATEST_GITHUB_VERSION=$LATEST_GITHUB_VERSION" >> $GITHUB_ENV
 
-      # Check if version has changed and set output
+      # Check if the version has changed for NPM and GitHub Packages
       - name: Check if version has changed
         id: version_check
         run: |
           if [ "$LATEST_VERSION" == "$CURRENT_VERSION" ]; then
-            echo "Version has not changed. Skipping publish."
-            echo "has_changed=false" >> $GITHUB_ENV
+            echo "Version has not changed for NPM. Skipping publish to NPM."
+            echo "has_changed_npm=false" >> $GITHUB_ENV
           else
-            echo "Version has changed. Proceeding with publish."
-            echo "has_changed=true" >> $GITHUB_ENV
+            echo "Version has changed for NPM. Proceeding with publish to NPM."
+            echo "has_changed_npm=true" >> $GITHUB_ENV
           fi
 
-      # Publish to NPM and GitHub Packages (only if version has changed)
-      - name: Publish to NPM and GitHub Packages
-        if: ${{ env.has_changed == 'true' }}
+          if [ "$LATEST_GITHUB_VERSION" == "$CURRENT_VERSION" ]; then
+            echo "Version has not changed for GitHub Packages. Skipping publish to GitHub Packages."
+            echo "has_changed_github=false" >> $GITHUB_ENV
+          else
+            echo "Version has changed for GitHub Packages. Proceeding with publish to GitHub Packages."
+            echo "has_changed_github=true" >> $GITHUB_ENV
+          fi
+
+      # Publish to NPM (if version has changed for NPM)
+      - name: Publish to NPM
+        if: ${{ env.has_changed_npm == 'true' }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" >> ~/.npmrc
+          npm publish --registry=${{ env.NPM_REGISTRY }}
+
+      # Publish to GitHub Packages (if version has changed for GitHub Packages)
+      - name: Publish to GitHub Packages
+        if: ${{ env.has_changed_github == 'true' }}
+        run: |
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
-          npm publish --registry=https://registry.npmjs.org/
-          npm publish --registry=${{ env.GITHUB_REGISTRY }}
+          npm publish --registry=${{ env.GITHUB_REGISTRY }} --name $GITHUB_PACKAGE_NAME
 
       # Tag the commit with the new version (only if version has changed)
       - name: Create Git tag for new version
-        if: ${{ env.has_changed == 'true' }}
+        if: ${{ env.has_changed_npm == 'true' }}
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
@@ -82,7 +96,7 @@ jobs:
 
       # Create release on GitHub (only if version has changed)
       - name: Create a GitHub release
-        if: ${{ env.has_changed == 'true' }}
+        if: ${{ env.has_changed_npm == 'true' }}
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
