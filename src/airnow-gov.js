@@ -133,8 +133,8 @@ module.exports = (robot) => {
         const textFallback = `${measurements[0].ReportingArea}, ${measurements[0].StateCode} - ${aqiMeasurements.join('; ')}`;
         const timestamp = dayjs(`${measurements[0].DateObserved} ${measurements[0].HourObserved}:00 ${measurements[0].LocalTimeZone}`).unix();
 
-        switch (robot.adapterName) {
-          case 'slack':
+        switch (true) {
+          case /slack/i.test(robot.adapterName):
             msg.send({
               attachments: [{
                 title: `${measurements[0].ReportingArea}, ${measurements[0].StateCode} Air Quality`,
