@@ -12,11 +12,10 @@ describe('hubot-airnow-gov slack', () => {
     before(async () => {
       ctx = await createTestBot({ adapterName: 'slack' });
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observations/current/ziplatLong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          distance: '25',
           api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .replyWithFile(200, './test/fixtures/current.json');
@@ -31,15 +30,15 @@ describe('hubot-airnow-gov slack', () => {
     });
 
     it('attachment has correct title', () => {
-      assert.equal(response.attachments[0].title, 'Nashville, TN Air Quality');
+      assert.equal(response.attachments[0].title, 'Nashville Air Quality');
     });
 
     it('attachment has correct title_link', () => {
-      assert.equal(response.attachments[0].title_link, 'https://www.airnow.gov/?city=Nashville&state=TN&country=USA');
+      assert.equal(response.attachments[0].title_link, 'https://www.airnow.gov/?city=Nashville&country=USA');
     });
 
     it('attachment has correct fallback', () => {
-      assert.equal(response.attachments[0].fallback, 'Nashville, TN - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(response.attachments[0].fallback, 'Nashville - O3: 46 (Good); PM2.5: 43 (Good)');
     });
 
     it('attachment has correct color', () => {
@@ -74,11 +73,10 @@ describe('hubot-airnow-gov slack', () => {
     before(async () => {
       ctx = await createTestBot({ adapterName: 'slack' });
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observations/current/ziplatLong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          distance: '25',
           api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .replyWithFile(200, './test/fixtures/current.json');
@@ -93,11 +91,11 @@ describe('hubot-airnow-gov slack', () => {
     });
 
     it('attachment has correct title', () => {
-      assert.equal(response.attachments[0].title, 'Nashville, TN Air Quality');
+      assert.equal(response.attachments[0].title, 'Nashville Air Quality');
     });
 
     it('attachment has correct fallback', () => {
-      assert.equal(response.attachments[0].fallback, 'Nashville, TN - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(response.attachments[0].fallback, 'Nashville - O3: 46 (Good); PM2.5: 43 (Good)');
     });
 
     it('attachment has correct color', () => {

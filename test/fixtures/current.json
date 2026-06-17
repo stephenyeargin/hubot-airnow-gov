@@ -1,32 +1,32 @@
 [
   {
-    "DateObserved": "2023-07-04 ",
-    "HourObserved": 14,
-    "LocalTimeZone": "CST",
-    "ReportingArea": "Nashville",
-    "StateCode": "TN",
-    "Latitude": 36.171,
-    "Longitude": -86.785,
-    "ParameterName": "O3",
-    "AQI": 46,
-    "Category": {
-      "Number": 1,
-      "Name": "Good"
-    }
+    "dateObserved": "2023-07-04",
+    "hourObserved": "14:00",
+    "localTimeZone": "CST",
+    "reportingAreaName": "Nashville",
+    "siteID": 474030001,
+    "siteName": "Nashville",
+    "parameterName": "O3",
+    "nowcastAQI": 46,
+    "AQICategoryName": "Good",
+    "reportingAgency": "Tennessee Division of Air Pollution Control",
+    "LookupBehavior": "Closest Reading By Pollutant",
+    "ConsideredMonitors": "All",
+    "LookupBoundary": "25 miles"
   },
   {
-    "DateObserved": "2023-07-04 ",
-    "HourObserved": 14,
-    "LocalTimeZone": "CST",
-    "ReportingArea": "Nashville",
-    "StateCode": "TN",
-    "Latitude": 36.171,
-    "Longitude": -86.785,
-    "ParameterName": "PM2.5",
-    "AQI": 43,
-    "Category": {
-      "Number": 1,
-      "Name": "Good"
-    }
+    "dateObserved": "2023-07-04",
+    "hourObserved": "14:00",
+    "localTimeZone": "CST",
+    "reportingAreaName": "Nashville",
+    "siteID": 474030002,
+    "siteName": "Nashville",
+    "parameterName": "PM2.5",
+    "nowcastAQI": 43,
+    "AQICategoryName": "Good",
+    "reportingAgency": "Tennessee Division of Air Pollution Control",
+    "LookupBehavior": "Closest Reading By Pollutant",
+    "ConsideredMonitors": "All",
+    "LookupBoundary": "25 miles"
   }
 ]

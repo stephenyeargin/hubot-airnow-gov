@@ -11,11 +11,10 @@ describe('hubot-airnow-gov', () => {
     before(async () => {
       ctx = await createTestBot();
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observations/current/ziplatLong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          distance: '25',
           api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .replyWithFile(200, './test/fixtures/current.json');
@@ -25,7 +24,7 @@ describe('hubot-airnow-gov', () => {
     after(() => ctx.shutdown());
 
     it('hubot responds with success', () => {
-      assert.equal(ctx.sends[0], 'Nashville, TN - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(ctx.sends[0], 'Nashville - O3: 46 (Good); PM2.5: 43 (Good)');
     });
   });
 
@@ -34,11 +33,10 @@ describe('hubot-airnow-gov', () => {
     before(async () => {
       ctx = await createTestBot();
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observations/current/ziplatLong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          distance: '25',
           api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .replyWithFile(200, './test/fixtures/current.json');
@@ -48,7 +46,7 @@ describe('hubot-airnow-gov', () => {
     after(() => ctx.shutdown());
 
     it('hubot responds with success', () => {
-      assert.equal(ctx.sends[0], 'Nashville, TN - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(ctx.sends[0], 'Nashville - O3: 46 (Good); PM2.5: 43 (Good)');
     });
   });
 
@@ -57,11 +55,10 @@ describe('hubot-airnow-gov', () => {
     before(async () => {
       ctx = await createTestBot();
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observations/current/ziplatLong')
         .query({
           format: 'application/json',
           zipCode: '38230',
-          distance: '25',
           api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .reply(200, []);
@@ -80,11 +77,10 @@ describe('hubot-airnow-gov', () => {
     before(async () => {
       ctx = await createTestBot();
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observations/current/ziplatLong')
         .query({
           format: 'application/json',
           zipCode: '0500',
-          distance: '25',
           api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .reply(500, 'Internal Server Error');
@@ -137,11 +133,10 @@ describe('hubot-airnow-gov with invalid API key', () => {
     before(async () => {
       ctx = await createTestBot({ env: { HUBOT_AIRNOW_API_KEY: 'bad-api-key' } });
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observations/current/ziplatLong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          distance: '25',
           api_key: 'bad-api-key',
         })
         .replyWithFile(401, './test/fixtures/invalid_api_key.json');
