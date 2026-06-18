@@ -38,7 +38,7 @@ describe('hubot-airnow-gov slack', () => {
     });
 
     it('attachment has correct fallback', () => {
-      assert.equal(response.attachments[0].fallback, 'Nashville - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(response.attachments[0].fallback, 'Nashville - PM2.5: 46 (Good); O3: 43 (Good)');
     });
 
     it('attachment has correct color', () => {
@@ -47,13 +47,14 @@ describe('hubot-airnow-gov slack', () => {
 
     it('attachment has correct fields', () => {
       assert.deepEqual(response.attachments[0].fields, [
-        { short: true, title: 'O3', value: '46 (Good)' },
-        { short: true, title: 'PM2.5', value: '43 (Good)' },
+        { short: true, title: 'PM2.5', value: '46 (Good) • LOCKELAND' },
+        { short: true, title: 'O3', value: '43 (Good) • EAST HEALTH CENTER' },
+        { short: false, title: 'Lookup Context', value: 'Closest Reading By Pollutant • 25 miles • All' },
       ]);
     });
 
     it('attachment has correct footer', () => {
-      assert.equal(response.attachments[0].footer, 'AirNow.gov');
+      assert.equal(response.attachments[0].footer, 'AirNow.gov • Data: Tennessee Division of Air Pollution Control');
     });
 
     it('attachment has correct author info', () => {
@@ -95,7 +96,7 @@ describe('hubot-airnow-gov slack', () => {
     });
 
     it('attachment has correct fallback', () => {
-      assert.equal(response.attachments[0].fallback, 'Nashville - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(response.attachments[0].fallback, 'Nashville - PM2.5: 46 (Good); O3: 43 (Good)');
     });
 
     it('attachment has correct color', () => {
@@ -104,8 +105,9 @@ describe('hubot-airnow-gov slack', () => {
 
     it('attachment has correct fields', () => {
       assert.deepEqual(response.attachments[0].fields, [
-        { short: true, title: 'O3', value: '46 (Good)' },
-        { short: true, title: 'PM2.5', value: '43 (Good)' },
+        { short: true, title: 'PM2.5', value: '46 (Good) • LOCKELAND' },
+        { short: true, title: 'O3', value: '43 (Good) • EAST HEALTH CENTER' },
+        { short: false, title: 'Lookup Context', value: 'Closest Reading By Pollutant • 25 miles • All' },
       ]);
     });
 

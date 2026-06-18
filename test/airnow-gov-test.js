@@ -24,7 +24,7 @@ describe('hubot-airnow-gov', () => {
     after(() => ctx.shutdown());
 
     it('hubot responds with success', () => {
-      assert.equal(ctx.sends[0], 'Nashville - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(ctx.sends[0], 'Nashville - PM2.5: 46 (Good); O3: 43 (Good)');
     });
   });
 
@@ -46,7 +46,7 @@ describe('hubot-airnow-gov', () => {
     after(() => ctx.shutdown());
 
     it('hubot responds with success', () => {
-      assert.equal(ctx.sends[0], 'Nashville - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(ctx.sends[0], 'Nashville - PM2.5: 46 (Good); O3: 43 (Good)');
     });
   });
 

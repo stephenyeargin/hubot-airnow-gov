@@ -119,32 +119,63 @@ module.exports = (robot) => {
           return;
         }
         // Show highest value first
-        const measurements = apiResponse.sort((a, b) => b.nowcastAQI - a.nowcastAQI);
+        const measurements = apiResponse.sort((a, b) => (
+          (b.nowcastAQI || b.AQI || 0) - (a.nowcastAQI || a.AQI || 0)
+        ));
+        const reportingAreaName = (
+          measurements[0].reportingAreaName || measurements[0].ReportingArea
+        );
+        const reportingAgency = (
+          measurements[0].reportingAgency || measurements[0].ReportingAgency
+        );
+        const lookupBehavior = (
+          measurements[0].lookupBehavior || measurements[0].LookupBehavior
+        );
+        const consideredMonitors = (
+          measurements[0].consideredMonitors || measurements[0].ConsideredMonitors
+        );
+        const lookupBoundary = measurements[0].lookupBoundary || measurements[0].LookupBoundary;
+        const hourObserved = Number.isInteger(measurements[0].hourObserved)
+          ? `${String(measurements[0].hourObserved).padStart(2, '0')}:00`
+          : measurements[0].hourObserved;
 
         measurements.forEach((row) => {
-          aqiMeasurements.push(`${row.parameterName}: ${row.nowcastAQI} (${row.AQICategoryName})`);
+          const parameterName = row.parameterName || row.ParameterName;
+          const nowcastAQI = row.nowcastAQI || row.AQI;
+          const aqiCategoryName = row.aqiCategoryName || row.AQICategoryName || row.Category?.Name;
+          const siteName = row.siteName || row.SiteName;
+
+          aqiMeasurements.push(`${parameterName}: ${nowcastAQI} (${aqiCategoryName})`);
           aqiMeasurementsFields.push({
             short: true,
-            title: row.parameterName,
-            value: `${row.nowcastAQI} (${row.AQICategoryName})`,
+            title: parameterName,
+            value: siteName ? `${nowcastAQI} (${aqiCategoryName}) • ${siteName}` : `${nowcastAQI} (${aqiCategoryName})`,
           });
         });
-        const textFallback = `${measurements[0].reportingAreaName} - ${aqiMeasurements.join('; ')}`;
-        const timestamp = dayjs(`${measurements[0].dateObserved} ${measurements[0].hourObserved} ${measurements[0].localTimeZone}`).unix();
+        if (lookupBehavior || lookupBoundary || consideredMonitors) {
+          aqiMeasurementsFields.push({
+            short: false,
+            title: 'Lookup Context',
+            value: [lookupBehavior, lookupBoundary, consideredMonitors].filter(Boolean).join(' • '),
+          });
+        }
+
+        const textFallback = `${reportingAreaName} - ${aqiMeasurements.join('; ')}`;
+        const timestamp = dayjs(`${measurements[0].dateObserved || measurements[0].DateObserved} ${hourObserved || `${measurements[0].HourObserved}:00`} ${measurements[0].localTimeZone || measurements[0].LocalTimeZone}`).unix();
 
         switch (true) {
           case /slack/i.test(robot.adapterName):
             msg.send({
               attachments: [{
-                title: `${measurements[0].reportingAreaName} Air Quality`,
-                title_link: `https://www.airnow.gov/?city=${measurements[0].reportingAreaName}&country=USA`,
+                title: `${reportingAreaName} Air Quality`,
+                title_link: `https://www.airnow.gov/?city=${reportingAreaName}&country=USA`,
                 fallback: textFallback,
                 author_icon: 'https://www.airnow.gov/apple-touch-icon.png',
                 author_link: 'https://www.airnow.gov/',
                 author_name: 'AirNow.gov',
-                color: getScoreColor(measurements[0].nowcastAQI),
+                color: getScoreColor(measurements[0].nowcastAQI || measurements[0].AQI),
                 fields: aqiMeasurementsFields,
-                footer: 'AirNow.gov',
+                footer: reportingAgency ? `AirNow.gov • Data: ${reportingAgency}` : 'AirNow.gov',
                 ts: timestamp,
               }],
             });

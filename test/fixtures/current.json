@@ -5,14 +5,14 @@
     "localTimeZone": "CST",
     "reportingAreaName": "Nashville",
     "siteID": 474030001,
-    "siteName": "Nashville",
-    "parameterName": "O3",
+    "siteName": "LOCKELAND",
+    "parameterName": "PM2.5",
     "nowcastAQI": 46,
-    "AQICategoryName": "Good",
+    "aqiCategoryName": "Good",
     "reportingAgency": "Tennessee Division of Air Pollution Control",
-    "LookupBehavior": "Closest Reading By Pollutant",
-    "ConsideredMonitors": "All",
-    "LookupBoundary": "25 miles"
+    "lookupBehavior": "Closest Reading By Pollutant",
+    "consideredMonitors": "All",
+    "lookupBoundary": "25 miles"
   },
   {
     "dateObserved": "2023-07-04",
@@ -20,13 +20,13 @@
     "localTimeZone": "CST",
     "reportingAreaName": "Nashville",
     "siteID": 474030002,
-    "siteName": "Nashville",
-    "parameterName": "PM2.5",
+    "siteName": "EAST HEALTH CENTER",
+    "parameterName": "O3",
     "nowcastAQI": 43,
-    "AQICategoryName": "Good",
+    "aqiCategoryName": "Good",
     "reportingAgency": "Tennessee Division of Air Pollution Control",
-    "LookupBehavior": "Closest Reading By Pollutant",
-    "ConsideredMonitors": "All",
-    "LookupBoundary": "25 miles"
+    "lookupBehavior": "Closest Reading By Pollutant",
+    "consideredMonitors": "All",
+    "lookupBoundary": "25 miles"
   }
 ]
