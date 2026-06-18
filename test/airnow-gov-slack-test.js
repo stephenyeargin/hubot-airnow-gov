@@ -12,12 +12,11 @@ describe('hubot-airnow-gov slack', () => {
     before(async () => {
       ctx = await createTestBot({ adapterName: 'slack' });
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observation/current/ziplatlong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          distance: '25',
-          api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
+          API_KEY: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .replyWithFile(200, './test/fixtures/current.json');
       response = await ctx.sendAndWaitForResponse('hubot aqi');
@@ -31,15 +30,15 @@ describe('hubot-airnow-gov slack', () => {
     });
 
     it('attachment has correct title', () => {
-      assert.equal(response.attachments[0].title, 'Nashville, TN Air Quality');
+      assert.equal(response.attachments[0].title, 'Nashville Air Quality');
     });
 
     it('attachment has correct title_link', () => {
-      assert.equal(response.attachments[0].title_link, 'https://www.airnow.gov/?city=Nashville&state=TN&country=USA');
+      assert.equal(response.attachments[0].title_link, 'https://www.airnow.gov/?city=Nashville&country=USA');
     });
 
     it('attachment has correct fallback', () => {
-      assert.equal(response.attachments[0].fallback, 'Nashville, TN - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(response.attachments[0].fallback, 'Nashville - PM2.5: 46 (Good); O3: 43 (Good)');
     });
 
     it('attachment has correct color', () => {
@@ -48,13 +47,14 @@ describe('hubot-airnow-gov slack', () => {
 
     it('attachment has correct fields', () => {
       assert.deepEqual(response.attachments[0].fields, [
-        { short: true, title: 'O3', value: '46 (Good)' },
-        { short: true, title: 'PM2.5', value: '43 (Good)' },
+        { short: true, title: 'PM2.5', value: '46 (Good) • LOCKELAND' },
+        { short: true, title: 'O3', value: '43 (Good) • EAST HEALTH CENTER' },
+        { short: false, title: 'Lookup Context', value: 'Closest Reading By Pollutant • 25 miles • All' },
       ]);
     });
 
     it('attachment has correct footer', () => {
-      assert.equal(response.attachments[0].footer, 'AirNow.gov');
+      assert.equal(response.attachments[0].footer, 'AirNow.gov • Data: Tennessee Division of Air Pollution Control');
     });
 
     it('attachment has correct author info', () => {
@@ -74,12 +74,11 @@ describe('hubot-airnow-gov slack', () => {
     before(async () => {
       ctx = await createTestBot({ adapterName: 'slack' });
       nock('https://www.airnowapi.org')
-        .get('/aq/observation/zipCode/current/')
+        .get('/aq/observation/current/ziplatlong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          distance: '25',
-          api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
+          API_KEY: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .replyWithFile(200, './test/fixtures/current.json');
       response = await ctx.sendAndWaitForResponse('hubot aqi 37206');
@@ -93,11 +92,11 @@ describe('hubot-airnow-gov slack', () => {
     });
 
     it('attachment has correct title', () => {
-      assert.equal(response.attachments[0].title, 'Nashville, TN Air Quality');
+      assert.equal(response.attachments[0].title, 'Nashville Air Quality');
     });
 
     it('attachment has correct fallback', () => {
-      assert.equal(response.attachments[0].fallback, 'Nashville, TN - O3: 46 (Good); PM2.5: 43 (Good)');
+      assert.equal(response.attachments[0].fallback, 'Nashville - PM2.5: 46 (Good); O3: 43 (Good)');
     });
 
     it('attachment has correct color', () => {
@@ -106,8 +105,9 @@ describe('hubot-airnow-gov slack', () => {
 
     it('attachment has correct fields', () => {
       assert.deepEqual(response.attachments[0].fields, [
-        { short: true, title: 'O3', value: '46 (Good)' },
-        { short: true, title: 'PM2.5', value: '43 (Good)' },
+        { short: true, title: 'PM2.5', value: '46 (Good) • LOCKELAND' },
+        { short: true, title: 'O3', value: '43 (Good) • EAST HEALTH CENTER' },
+        { short: false, title: 'Lookup Context', value: 'Closest Reading By Pollutant • 25 miles • All' },
       ]);
     });
 
