@@ -29,7 +29,7 @@ module.exports = (robot) => {
 
     if (method.toUpperCase() === 'GET') {
       const defaultParameters = {
-        api_key: apiKey,
+        API_KEY: apiKey,
         format: 'application/json',
       };
       const queryPayload = { ...defaultParameters, ...payload };
@@ -39,6 +39,11 @@ module.exports = (robot) => {
           if (res.statusCode === 500) {
             robot.logger.debug(body);
             callback('Received an invalid response from the API.');
+            return;
+          }
+          if (res.statusCode === 302) {
+            robot.logger.debug(res.rawHeaders);
+            callback('Received an invalid redirect from the API.');
             return;
           }
           if (res.statusCode === 401) {
@@ -95,7 +100,7 @@ module.exports = (robot) => {
       zipCode,
     };
 
-    makeAPIRequest('GET', 'aq/observations/current/ziplatLong', payload, (err, _res, body) => {
+    makeAPIRequest('GET', 'aq/observation/current/ziplatlong', payload, (err, _res, body) => {
       if (err) {
         robot.logger.error(err);
         msg.send(`Error: ${err}`);

@@ -12,11 +12,11 @@ describe('hubot-airnow-gov slack', () => {
     before(async () => {
       ctx = await createTestBot({ adapterName: 'slack' });
       nock('https://www.airnowapi.org')
-        .get('/aq/observations/current/ziplatLong')
+        .get('/aq/observation/current/ziplatlong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
+          API_KEY: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .replyWithFile(200, './test/fixtures/current.json');
       response = await ctx.sendAndWaitForResponse('hubot aqi');
@@ -74,11 +74,11 @@ describe('hubot-airnow-gov slack', () => {
     before(async () => {
       ctx = await createTestBot({ adapterName: 'slack' });
       nock('https://www.airnowapi.org')
-        .get('/aq/observations/current/ziplatLong')
+        .get('/aq/observation/current/ziplatlong')
         .query({
           format: 'application/json',
           zipCode: '37206',
-          api_key: 'ABCDEF01-23456789-ABCDEF01-23456789',
+          API_KEY: 'ABCDEF01-23456789-ABCDEF01-23456789',
         })
         .replyWithFile(200, './test/fixtures/current.json');
       response = await ctx.sendAndWaitForResponse('hubot aqi 37206');
