@@ -120,7 +120,7 @@ module.exports = (robot) => {
         }
         // Show highest value first
         const measurements = apiResponse.sort((a, b) => (
-          (b.nowcastAQI || b.AQI || 0) - (a.nowcastAQI || a.AQI || 0)
+          ((b.nowcastAQI ?? b.AQI) ?? 0) - ((a.nowcastAQI ?? a.AQI) ?? 0)
         ));
         const reportingAreaName = (
           measurements[0].reportingAreaName || measurements[0].ReportingArea
@@ -135,14 +135,25 @@ module.exports = (robot) => {
           measurements[0].consideredMonitors || measurements[0].ConsideredMonitors
         );
         const lookupBoundary = measurements[0].lookupBoundary || measurements[0].LookupBoundary;
-        const hourObserved = Number.isInteger(measurements[0].hourObserved)
-          ? `${String(measurements[0].hourObserved).padStart(2, '0')}:00`
-          : measurements[0].hourObserved;
+        const dateObserved = measurements[0].dateObserved || measurements[0].DateObserved;
+        const localTimeZone = measurements[0].localTimeZone || measurements[0].LocalTimeZone;
+        const rawHourObserved = measurements[0].hourObserved ?? measurements[0].HourObserved;
+        let hourObservedText = null;
+        if (rawHourObserved != null) {
+          const hourObservedString = String(rawHourObserved);
+          if (Number.isInteger(rawHourObserved)) {
+            hourObservedText = `${hourObservedString.padStart(2, '0')}:00`;
+          } else if (/^\d{1,2}$/.test(hourObservedString)) {
+            hourObservedText = `${hourObservedString.padStart(2, '0')}:00`;
+          } else {
+            hourObservedText = hourObservedString;
+          }
+        }
 
         measurements.forEach((row) => {
-          const parameterName = row.parameterName || row.ParameterName;
-          const nowcastAQI = row.nowcastAQI || row.AQI;
-          const aqiCategoryName = row.aqiCategoryName || row.AQICategoryName || row.Category?.Name;
+          const parameterName = row.parameterName ?? row.ParameterName;
+          const nowcastAQI = row.nowcastAQI ?? row.AQI;
+          const aqiCategoryName = row.aqiCategoryName ?? row.Category?.Name;
           const siteName = row.siteName || row.SiteName;
 
           aqiMeasurements.push(`${parameterName}: ${nowcastAQI} (${aqiCategoryName})`);
@@ -161,7 +172,11 @@ module.exports = (robot) => {
         }
 
         const textFallback = `${reportingAreaName} - ${aqiMeasurements.join('; ')}`;
-        const timestamp = dayjs(`${measurements[0].dateObserved || measurements[0].DateObserved} ${hourObserved || `${measurements[0].HourObserved}:00`} ${measurements[0].localTimeZone || measurements[0].LocalTimeZone}`).unix();
+        let timestamp;
+        if (dateObserved && hourObservedText && localTimeZone) {
+          const parsedTimestamp = dayjs(`${dateObserved} ${hourObservedText} ${localTimeZone}`);
+          timestamp = parsedTimestamp.isValid() ? parsedTimestamp.unix() : undefined;
+        }
 
         switch (true) {
           case /slack/i.test(robot.adapterName):
@@ -173,7 +188,7 @@ module.exports = (robot) => {
                 author_icon: 'https://www.airnow.gov/apple-touch-icon.png',
                 author_link: 'https://www.airnow.gov/',
                 author_name: 'AirNow.gov',
-                color: getScoreColor(measurements[0].nowcastAQI || measurements[0].AQI),
+                color: getScoreColor(measurements[0].nowcastAQI ?? measurements[0].AQI),
                 fields: aqiMeasurementsFields,
                 footer: reportingAgency ? `AirNow.gov • Data: ${reportingAgency}` : 'AirNow.gov',
                 ts: timestamp,
