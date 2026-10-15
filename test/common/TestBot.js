@@ -15,10 +15,14 @@ class TestBotContext {
     this.nock = nock;
   }
 
-  async send(message) {
+  async send(message, timeout = 2000) {
     const id = (Math.random() + 1).toString(36).substring(7);
+    const responded = new Promise((done) => {
+      const timer = setTimeout(done, timeout);
+      this.robot.adapter.once('send', () => { clearTimeout(timer); done(); });
+    });
     this.robot.adapter.receive(new TextMessage(this.user, message, id));
-    await new Promise((done) => { setTimeout(done, 50); });
+    await responded;
   }
 
   async sendAndWaitForResponse(message, responseType = 'send') {
